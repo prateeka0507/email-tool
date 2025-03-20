@@ -7,7 +7,7 @@ import { getAllLists } from '../services/audience.js';
 
 const router = Router();
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://email-tool-chry.onrender.com';
 
 const api = axios.create({
   baseURL: API_URL,
