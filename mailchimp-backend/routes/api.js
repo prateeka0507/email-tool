@@ -3,6 +3,8 @@ import axios from 'axios';
 import express from 'express';
 import cors from 'cors';
 import { Router } from 'express';
+import mailchimp from '@mailchimp/mailchimp_marketing';
+
 const router = Router();
 
 const API_URL = 'http://localhost:3000/api';
@@ -25,6 +27,20 @@ const corsOptions = {
 
 // Apply CORS middleware
 router.use(cors(corsOptions));
+
+// Get all audience lists
+router.get('/audience/lists', async (req, res) => {
+  try {
+    const response = await mailchimp.lists.getAllLists();
+    res.json(response.lists);
+  } catch (error) {
+    console.error('Mailchimp API Error:', error);
+    res.status(error.status || 500).json({
+      error: error.message,
+      detail: error.response?.body?.detail || 'Internal Server Error'
+    });
+  }
+});
 
 export const audienceService = {
   getAllLists: () => api.get('/audience/lists'),
