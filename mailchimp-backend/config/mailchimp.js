@@ -48,3 +48,8 @@ const corsOptions = {
   origin: [FRONTEND_URL],
   // ... other options
 };
+
+export const config = {
+  apiKey: process.env.MAILCHIMP_API_KEY,
+  // ...
+};
