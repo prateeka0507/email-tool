@@ -29,7 +29,9 @@ import apiRoutes from './routes/api.js';
 
 // Initialize Express app
 const app = express();
-const port = process.env.PORT || 3000;
+
+// Use the PORT from environment variables, fallback to 3000 only for local development
+const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
@@ -183,7 +185,17 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Add a health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date(),
+    environment: process.env.NODE_ENV,
+    service: 'mailchimp-backend'
+  });
+});
+
 // Start the server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
