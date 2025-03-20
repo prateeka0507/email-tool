@@ -13,6 +13,7 @@ import csvParser from 'csv-parser';
 import { client as mailchimp, testConnection } from './config/mailchimp.js';
 import audienceRouter from './routes/audience.js';
 import campaignRouter from './routes/campaign.js';
+import apiRoutes from './routes/api.js';
 
 // Get current filename and directory
 const __filename = fileURLToPath(import.meta.url);
@@ -24,20 +25,18 @@ dotenv.config();
 // Import your MongoDB connection
 import connectDB from './config/db.js';
 
-// Import routes (make sure to add .js extension)
-import apiRoutes from './routes/api.js';
-
 // Initialize Express app
 const app = express();
-
-// Use the PORT from environment variables, fallback to 3000 only for local development
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -185,17 +184,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Add a health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date(),
-    environment: process.env.NODE_ENV,
-    service: 'mailchimp-backend'
-  });
-});
-
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
