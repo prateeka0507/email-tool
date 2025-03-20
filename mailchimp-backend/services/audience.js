@@ -1,31 +1,22 @@
 // services/audience.js
-import { client as mailchimp } from '../config/mailchimp.js';
+import mailchimp from '@mailchimp/mailchimp_marketing';
 import csvParser from 'csv-parser';
 import fs from 'fs';
 
+// Make sure mailchimp is configured before using it
+mailchimp.setConfig({
+  apiKey: process.env.MAILCHIMP_API_KEY,
+  server: process.env.MAILCHIMP_SERVER_PREFIX
+});
+
 // Get all lists/audiences
-const getAllLists = async () => {
+export const getAllLists = async () => {
   try {
     const response = await mailchimp.lists.getAllLists();
-    
-    // Ensure we have a valid response with lists
-    if (!response || !response.lists) {
-      throw new Error('Invalid response from Mailchimp API');
-    }
-
-    // Transform the response to include only necessary data
-    return response.lists.map(list => ({
-      id: list.id,
-      name: list.name,
-      memberCount: list.stats.member_count,
-      dateCreated: list.date_created,
-      webId: list.web_id
-    }));
-
+    return response.lists;
   } catch (error) {
-    console.error('Error in getAllLists:', error);
-    // Add more context to the error
-    throw new Error(`Failed to fetch Mailchimp lists: ${error.message}`);
+    console.error('Error fetching lists:', error);
+    throw error;
   }
 };
 
