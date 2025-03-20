@@ -1,8 +1,9 @@
 // src/services/api.js
 import axios from 'axios';
 import express from 'express';
-const router = express.Router();
-const cors = require('cors');
+import cors from 'cors';
+import { Router } from 'express';
+const router = Router();
 
 const API_URL = 'http://localhost:3000/api';
 
