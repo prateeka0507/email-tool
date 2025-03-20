@@ -34,7 +34,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['https://soft-youtiao-73aeea.netlify.app'],
   credentials: true
 }));
 app.use(bodyParser.json());
@@ -44,21 +44,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const upload = multer({ dest: 'uploads/' });
 
 // Use routes
+app.use('/', apiRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/audience', audienceRouter);
 app.use('/api/campaigns', campaignRouter);
 
 // Test the connection when server starts
 testConnection()
-  .then(isConnected => {
-    if (isConnected) {
-      console.log('✅ Mailchimp connection verified on server start');
-    } else {
-      console.error('❌ Failed to connect to Mailchimp on server start');
-    }
+  .then(() => {
+    console.log('Mailchimp connection verified');
   })
   .catch(error => {
-    console.error('❌ Error testing Mailchimp connection:', error);
+    console.error('Failed to connect to Mailchimp:', error);
+    // Optionally exit if Mailchimp connection is critical
+    // process.exit(1);
   });
 
 // Test route for Mailchimp connection
@@ -168,19 +167,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  
-  if (err.name === 'MulterError') {
-    return res.status(400).json({ 
-      error: 'File upload error',
-      details: err.message 
-    });
-  }
-  
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  console.error('Server Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? null : err.message
   });
 });
 
