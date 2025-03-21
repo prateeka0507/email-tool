@@ -32,11 +32,52 @@ const port = process.env.PORT || 3000;
 // Connect to MongoDB
 connectDB();
 
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://soft-youtiao-73aeea.netlify.app' // Your Netlify frontend UR    // Your Render backend URL
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost')) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin); // Add logging for debugging
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Allow credentials (cookies, authorization headers, etc)
+  maxAge: 86400 // Cache preflight request results for 24 hours
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Add error handling for CORS
+app.use((err, req, res, next) => {
+  if (err.message.startsWith('Not allowed by CORS')) {
+    console.error('CORS Error:', {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path
+    });
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Origin not allowed',
+      origin: req.headers.origin
+    });
+  }
+  next(err);
+});
+
 // Middleware
-app.use(cors({
-  origin: ['https://soft-youtiao-73aeea.netlify.app'],
-  credentials: true
-}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -177,4 +218,5 @@ app.use((err, req, res, next) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
